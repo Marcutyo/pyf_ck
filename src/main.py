@@ -54,7 +54,7 @@ def _get_codes() -> list[str]:
         try:
             return [_check_and_sanitize(input("Write your code: \n"))]
         except ValueError:
-            print("Invalid code, try again. Instructions permitted are: {ADMITTED_CODE_PATTERN}\n")
+            print(f"Invalid code, try again. Instructions permitted are: {ADMITTED_CODE_PATTERN}\n")
             sys.exit(1)
 
     codes, failed = _read_texts()
