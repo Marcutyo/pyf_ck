@@ -1,4 +1,33 @@
 from collections import defaultdict
+from typing import Final
+
+ADMITTED_CODE_PATTERN: Final[set[str]] = set('+-><.,[]')
+
+
+def sanitize(code: str) -> str:
+    """
+    Removes the whitespace from the code and checks that only Brainfuck
+    instructions are left.
+
+    Parameters
+    ----------
+    code : str
+        The raw string of Brainfuck code.
+
+    Returns
+    -------
+    str
+        The code without whitespace and line breaks.
+
+    Raises
+    ------
+    ValueError
+        If the code contains a character that is not a Brainfuck instruction.
+    """
+    code = "".join(code.split())
+    if not all(c in ADMITTED_CODE_PATTERN for c in code):
+        raise ValueError(f"Invalid code. Instructions permitted are: {ADMITTED_CODE_PATTERN}")
+    return code
 
 
 def build_jump_table(code: str) -> dict[int, int]:

@@ -2,17 +2,9 @@ import sys
 from pathlib import Path
 from typing import Final
 
-from interpreter import build_jump_table, interpret
+from interpreter import ADMITTED_CODE_PATTERN, build_jump_table, interpret, sanitize
 
 CODES_DIR: Final[Path] = Path(__file__).resolve().parent.parent / "codes"
-ADMITTED_CODE_PATTERN: Final[set[str]] = set('+-><.,[]')
-
-
-def _check_and_sanitize(code: str) -> str:
-    code = "".join(code.split())
-    if not all(c in ADMITTED_CODE_PATTERN for c in code):
-        raise ValueError(f"Invalid code. Instructions permitted are: {ADMITTED_CODE_PATTERN}")
-    return code
 
 
 def _read_texts() -> tuple[list[str], list[str]]:
@@ -27,7 +19,7 @@ def _read_texts() -> tuple[list[str], list[str]]:
         if not path.is_file():
             continue
         try:
-            texts.append(_check_and_sanitize(path.read_text(encoding="utf-8")))
+            texts.append(sanitize(path.read_text(encoding="utf-8")))
         except (OSError, UnicodeDecodeError):
             failed.append(path.name)
         except ValueError as e:
@@ -52,7 +44,7 @@ def _ask_choice() -> str:
 def _get_codes() -> list[str]:
     if _ask_choice() == "2":
         try:
-            return [_check_and_sanitize(input("Write your code: \n"))]
+            return [sanitize(input("Write your code: \n"))]
         except ValueError:
             print(f"Invalid code, try again. Instructions permitted are: {ADMITTED_CODE_PATTERN}\n")
             sys.exit(1)
