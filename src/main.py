@@ -66,7 +66,12 @@ def main():
     for code in codes:
         jump_table: dict[int, int] = build_jump_table(code)
         print("OUTPUT: ", end='')
-        interpret(code, jump_table)
+        memory: dict[int, int] = interpret(code, jump_table)
+        print()
+        print('MEMORY STATUS')
+        for k, v in memory.items():
+            print(f'{k}: {v}')
+        print()
 
 
 if __name__ == '__main__':

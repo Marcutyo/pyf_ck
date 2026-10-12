@@ -85,9 +85,9 @@ def build_jump_table(code: str) -> dict[int, int]:
 def interpret(
         code: str,
         jump_table: dict[int, int]
-) -> None:
+) -> dict[int, int]:
     """
-    Executes a Brainfuck program, then prints the final state of the memory.
+    Executes a Brainfuck program and returns the final state of the memory.
 
     The memory is a tape of cells, each holding a value between 0 and 255
     (it wraps around when going over the limits). A pointer tells which cell
@@ -107,6 +107,11 @@ def interpret(
         The sanitized string of Brainfuck code to execute.
     jump_table : dict[int, int]
         Bidirectional jump table of the code, as built by `build_jump_table`.
+
+    Returns
+    -------
+    dict[int, int]
+        The cells used by the program, as {cell index: value}, sorted by index.
 
     Raises
     ------
@@ -163,12 +168,4 @@ def interpret(
         else:
             raise ValueError(f'Unknown symbol: {current_symbol!r}')
 
-    print()
-    _print_memory(cells)
-    print()
-
-
-def _print_memory(cells: dict[int, int]) -> None:
-    print('MEMORY STATUS')
-    for k, v in cells.items():
-        print(f'{k}: {v}')
+    return dict(sorted(cells.items()))
