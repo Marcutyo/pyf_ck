@@ -22,6 +22,14 @@ Whitespace and line breaks in the code are ignored. Any other character that is 
 
 After each program runs, its output is printed together with the final state of the memory cells that were used.
 
+On terminals that support it, the output is colored. Colors are disabled automatically when the output is redirected to a file or a pipe, and you can opt out explicitly by setting the `NO_COLOR` environment variable (see [no-color.org](https://no-color.org)):
+
+```bash
+NO_COLOR=1 uv run src/main.py
+```
+
+In PowerShell: `$env:NO_COLOR = 1; uv run src/main.py`.
+
 Some example programs are available in `samples/`. For instance, to try them:
 
 ```bash
