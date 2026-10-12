@@ -2,6 +2,35 @@ from collections import defaultdict
 
 
 def build_jump_table(code: str) -> dict[int, int]:
+    """
+    Builds the bidirectional jump table used by the interpreter.
+
+    The jump table maps the index of each bracket to the index of its matching
+    one, in both directions: '[' -> ']' and ']' -> '['. It is computed once,
+    before the execution, so that the interpreter can jump between brackets
+    in constant time instead of scanning the code looking for the match
+    every time a loop starts or ends.
+
+    Example: for the code "+[-]" the table is {1: 3, 3: 1}.
+
+    Parameters
+    ----------
+    code : str
+        The string of Brainfuck code to process.
+
+    Returns
+    -------
+    dict[int, int]
+        Bidirectional jump table.
+
+    Raises
+    ------
+    ValueError
+        If a closing bracket has no opening bracket before it, or if at the
+        end of the reading one or more opening brackets remained unmatched.
+    """
+    # stack of '[' still waiting for their ']': the last one opened is the first one closed,
+    # which is what makes nested loops match correctly
     unmatched_open_idxs: list[int] = []
     jump_table: dict[int, int] = {}
 
@@ -28,6 +57,36 @@ def interpret(
         code: str,
         jump_table: dict[int, int]
 ) -> None:
+    """
+    Executes a Brainfuck program, then prints the final state of the memory.
+
+    The memory is a tape of cells, each holding a value between 0 and 255
+    (it wraps around when going over the limits). A pointer tells which cell
+    is the current one, and the instructions move it or change its value.
+
+    Instruction set:
+        '+' / '-' : increment / decrement the current cell
+        '>' / '<' : move the pointer to the next / previous cell
+        '.'       : print the current cell as an ASCII character
+        ','       : read a single character and store it in the current cell
+        '['       : if the current cell is 0, jump after the matching ']'
+        ']'       : jump back to the matching '[' (which checks the cell again)
+
+    Parameters
+    ----------
+    code : str
+        The sanitized string of Brainfuck code to execute.
+    jump_table : dict[int, int]
+        Bidirectional jump table of the code, as built by `build_jump_table`.
+
+    Raises
+    ------
+    ValueError
+        If the code contains an unknown symbol, or if the input given to ','
+        is not a single character.
+    """
+    # defaultdict gives every cell a starting value of 0 and lets the tape
+    # grow on demand in both directions (negative indexes included)
     cells: dict[int, int] = defaultdict(int)
 
     pointer_idx: int = 0
@@ -38,11 +97,11 @@ def interpret(
 
         if current_symbol == '+':
             cells[pointer_idx] += 1
-            cells[pointer_idx] %= 256
+            cells[pointer_idx] %= 256  # wrap around: 255 + 1 -> 0
             i += 1
         elif current_symbol == '-':
             cells[pointer_idx] -= 1
-            cells[pointer_idx] %= 256
+            cells[pointer_idx] %= 256  # wrap around: 0 - 1 -> 255
             i += 1
         elif current_symbol == '>':
             pointer_idx += 1
@@ -65,7 +124,7 @@ def interpret(
             i += 1
         elif current_symbol == '[':
             if cells[pointer_idx] == 0:
-                closing_idx: int = jump_table[i]
+                closing_idx: int = jump_table[i]  # skip the loop body entirely
                 i = closing_idx + 1  # move 1 index after closing bracket to continue program
             else:
                 i += 1
