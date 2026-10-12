@@ -26,7 +26,8 @@ def sanitize(code: str) -> str:
     """
     code = "".join(code.split())
     if not all(c in ADMITTED_CODE_PATTERN for c in code):
-        raise ValueError(f"Invalid code. Instructions permitted are: {ADMITTED_CODE_PATTERN}")
+        allowed: str = " ".join(sorted(ADMITTED_CODE_PATTERN))
+        raise ValueError(f"Invalid code. Allowed instructions: {allowed}")
     return code
 
 
@@ -149,7 +150,7 @@ def interpret(
         elif current_symbol == ',':
             while True:
                 try:
-                    user_input: int = ord(input("Write a single character: "))
+                    user_input: int = ord(input("⌨️  Write a single character: "))
                 except ValueError:
                     raise ValueError('Invalid input. Expected 1 single character.')
                 else:
